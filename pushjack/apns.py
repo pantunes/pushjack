@@ -176,6 +176,8 @@ class APNSClient(object):
                 app bundle; it may include the extension or omit it.
             mutable_content (bool, optional): if ``True``, triggers Apple
                 Notification Service Extension. Defaults to ``None``.
+            url_args (list, optional): List of values to form the link
+                string defined in ``urlFormatString`` in Safari Push Package.
             thread_id (str, optional): Identifier for grouping notifications.
                 iOS groups notifications with the same thread identifier
                 together in Notification Center. Defaults to ``None``.
@@ -448,6 +450,7 @@ class APNSMessage(object):
                  loc_args=None,
                  launch_image=None,
                  mutable_content=None,
+                 url_args=None,
                  thread_id=None,
                  extra=None):
         self.message = message
@@ -463,6 +466,7 @@ class APNSMessage(object):
         self.loc_args = loc_args
         self.launch_image = launch_image
         self.mutable_content = mutable_content
+        self.url_args = url_args
         self.thread_id = thread_id
         self.extra = extra
 
@@ -490,7 +494,9 @@ class APNSMessage(object):
 
             alert = compact_dict(alert)
         else:
-            alert = self.message
+            alert = compact_dict({
+                'body': self.message
+            })
 
         message.update(self.extra or {})
         message['aps'] = compact_dict({
@@ -500,6 +506,7 @@ class APNSMessage(object):
             'category': self.category,
             'content-available': 1 if self.content_available else None,
             'mutable-content': 1 if self.mutable_content else None,
+            'url-args': self.url_args,
             'thread-id': self.thread_id
         })
 
